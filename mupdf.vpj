@@ -1,0 +1,455 @@
+<!DOCTYPE Project SYSTEM "http://www.slickedit.com/dtd/vse/10.0/vpj.dtd">
+<Project
+	Version="10.0"
+	VendorName="SlickEdit"
+	TemplateName="GNU C/C++"
+	WorkingDir=".">
+	<Config
+		Name="Debug"
+		Type="gnuc"
+		DebugCallbackName="gdb"
+		Version="1"
+		OutputFile="%bdmupdf"
+		CompilerConfigName="Latest Version">
+		<Menu>
+			<Target
+				Name="Compile"
+				MenuCaption="&amp;Compile"
+				Dialog="_gnuc_options_form Compile"
+				CaptureOutputWith="ProcessBuffer"
+				Deletable="0"
+				OutputExts="*.o"
+				SaveOption="SaveCurrent"
+				RunFromDir="%rw">
+				<Exec CmdLine='gcc -c %xup  %defd -g -o "%bd%n%oe" %i "%f"'/>
+			</Target>
+			<Target
+				Name="Link"
+				MenuCaption="&amp;Link"
+				ShowOnMenu="Never"
+				Dialog="_gnuc_options_form Link"
+				CaptureOutputWith="ProcessBuffer"
+				Deletable="0"
+				SaveOption="SaveCurrent"
+				RunFromDir="%rw">
+				<Exec CmdLine='gcc %xup -g -o "%o" %f %libs'/>
+			</Target>
+			<Target
+				Name="Build"
+				MenuCaption="&amp;Build"
+				CaptureOutputWith="ProcessBuffer"
+				Deletable="0"
+				SaveOption="SaveWorkspaceFiles"
+				RunFromDir="%rw">
+				<Exec CmdLine="make"/>
+			</Target>
+			<Target
+				Name="Rebuild"
+				MenuCaption="&amp;Rebuild"
+				CaptureOutputWith="ProcessBuffer"
+				Deletable="0"
+				SaveOption="SaveWorkspaceFiles"
+				RunFromDir="%rw">
+				<Exec CmdLine=""/>
+			</Target>
+			<Target
+				Name="Debug"
+				MenuCaption="&amp;Debug"
+				Dialog="_gnuc_options_form Run/Debug"
+				BuildFirst="1"
+				CaptureOutputWith="ProcessBuffer"
+				Deletable="0"
+				SaveOption="SaveNone"
+				RunFromDir="%rw">
+				<Exec CmdLine='vsdebugio -prog "%o"'/>
+			</Target>
+			<Target
+				Name="Execute"
+				MenuCaption="E&amp;xecute"
+				Dialog="_gnuc_options_form Run/Debug"
+				BuildFirst="1"
+				CaptureOutputWith="ProcessBuffer"
+				Deletable="0"
+				SaveOption="SaveWorkspaceFiles"
+				RunFromDir="%rw">
+				<Exec CmdLine='"%o"'/>
+			</Target>
+			<Target
+				Name="dash"
+				MenuCaption="-"
+				Deletable="0">
+				<Exec/>
+			</Target>
+			<Target
+				Name="GNU C Options"
+				MenuCaption="GNU C &amp;Options..."
+				ShowOnMenu="HideIfNoCmdLine"
+				Deletable="0"
+				SaveOption="SaveNone">
+				<Exec
+					CmdLine="gnucoptions"
+					Type="Slick-C"/>
+			</Target>
+		</Menu>
+		<List Name="GNUC Options">
+			<Item
+				Name="LinkerOutputType"
+				Value="Executable"/>
+		</List>
+	</Config>
+	<Config
+		Name="Release"
+		Type="gnuc"
+		DebugCallbackName="gdb"
+		Version="1"
+		OutputFile="%bdmupdf"
+		CompilerConfigName="Latest Version">
+		<Menu>
+			<Target
+				Name="Compile"
+				MenuCaption="&amp;Compile"
+				Dialog="_gnuc_options_form Compile"
+				CaptureOutputWith="ProcessBuffer"
+				Deletable="0"
+				OutputExts="*.o"
+				SaveOption="SaveCurrent"
+				RunFromDir="%rw">
+				<Exec CmdLine='gcc -c %xup %defd -o "%bd%n%oe" %i "%f"'/>
+			</Target>
+			<Target
+				Name="Link"
+				MenuCaption="&amp;Link"
+				ShowOnMenu="Never"
+				Dialog="_gnuc_options_form Link"
+				CaptureOutputWith="ProcessBuffer"
+				Deletable="0"
+				SaveOption="SaveCurrent"
+				RunFromDir="%rw">
+				<Exec CmdLine='gcc %xup -o "%o" %f %libs'/>
+			</Target>
+			<Target
+				Name="Build"
+				MenuCaption="&amp;Build"
+				CaptureOutputWith="ProcessBuffer"
+				Deletable="0"
+				SaveOption="SaveWorkspaceFiles"
+				RunFromDir="%rw">
+				<Exec CmdLine="make"/>
+			</Target>
+			<Target
+				Name="Rebuild"
+				MenuCaption="&amp;Rebuild"
+				CaptureOutputWith="ProcessBuffer"
+				Deletable="0"
+				SaveOption="SaveWorkspaceFiles"
+				RunFromDir="%rw">
+				<Exec CmdLine=""/>
+			</Target>
+			<Target
+				Name="Debug"
+				MenuCaption="&amp;Debug"
+				Dialog="_gnuc_options_form Run/Debug"
+				BuildFirst="1"
+				CaptureOutputWith="ProcessBuffer"
+				Deletable="0"
+				SaveOption="SaveNone"
+				RunFromDir="%rw">
+				<Exec CmdLine='vsdebugio -prog "%o"'/>
+			</Target>
+			<Target
+				Name="Execute"
+				MenuCaption="E&amp;xecute"
+				Dialog="_gnuc_options_form Run/Debug"
+				BuildFirst="1"
+				CaptureOutputWith="ProcessBuffer"
+				Deletable="0"
+				SaveOption="SaveWorkspaceFiles"
+				RunFromDir="%rw">
+				<Exec CmdLine='"%o"'/>
+			</Target>
+			<Target
+				Name="dash"
+				MenuCaption="-"
+				Deletable="0">
+				<Exec/>
+			</Target>
+			<Target
+				Name="GNU C Options"
+				MenuCaption="GNU C &amp;Options..."
+				ShowOnMenu="HideIfNoCmdLine"
+				Deletable="0"
+				SaveOption="SaveNone">
+				<Exec
+					CmdLine="gnucoptions"
+					Type="Slick-C"/>
+			</Target>
+		</Menu>
+		<List Name="GNUC Options">
+			<Item
+				Name="LinkerOutputType"
+				Value="Executable"/>
+		</List>
+	</Config>
+	<CustomFolders>
+		<Folder
+			Name="Source Files"
+			Filters="*.c;*.C;*.cc;*.cpp;*.cp;*.cxx;*.c++;*.prg;*.pas;*.dpr;*.asm;*.s;*.bas;*.java;*.cs;*.sc;*.e;*.cob;*.html;*.rc;*.tcl;*.py;*.pl;*.d">
+		</Folder>
+		<Folder
+			Name="Header Files"
+			Filters="*.h;*.H;*.hh;*.hpp;*.hxx;*.inc;*.sh;*.cpy;*.if">
+		</Folder>
+		<Folder
+			Name="Resource Files"
+			Filters="*.ico;*.cur;*.dlg">
+		</Folder>
+		<Folder
+			Name="Bitmaps"
+			Filters="*.bmp"/>
+		<Folder
+			Name="Other Files"
+			Filters="">
+		</Folder>
+	</CustomFolders>
+	<Files AutoFolders="PackageView">
+		<Folder Name="android">
+			<F N="android/AndroidManifest.xml"/>
+			<F N="android/build.properties"/>
+			<F N="android/build.sh"/>
+			<F
+				N="android/build.xml"
+				Type="Ant"/>
+			<F N="android/default.properties"/>
+			<F N="android/local.properties"/>
+			<F N="android/ReadMe.txt"/>
+		</Folder>
+		<Folder Name="android/jni">
+			<F N="android/jni/mupdf.c"/>
+			<F
+				N="android/jni/Android.mk"
+				Type="Makefile"/>
+			<F
+				N="android/jni/Application.mk"
+				Type="Makefile"/>
+			<F
+				N="android/jni/Core.mk"
+				Type="Makefile"/>
+			<F
+				N="android/jni/ThirdParty.mk"
+				Type="Makefile"/>
+		</Folder>
+		<Folder Name="android/res/drawable-hdpi">
+			<F N="android/res/drawable-hdpi/icon.png"/>
+		</Folder>
+		<Folder Name="android/res/drawable-ldpi">
+			<F N="android/res/drawable-ldpi/icon.png"/>
+		</Folder>
+		<Folder Name="android/res/drawable-mdpi">
+			<F N="android/res/drawable-mdpi/icon.png"/>
+		</Folder>
+		<Folder Name="android/res/layout">
+			<F N="android/res/layout/main.xml"/>
+		</Folder>
+		<Folder Name="android/res/values">
+			<F N="android/res/values/strings.xml"/>
+			<F N="android/res/values/theme.xml"/>
+		</Folder>
+		<Folder Name="apps">
+			<F N="apps/mupdf_icon_antialias.ico"/>
+			<F N="apps/mupdf_icon_bitmap.ico"/>
+			<F N="apps/pdfapp.c"/>
+			<F N="apps/pdfapp.h"/>
+			<F N="apps/pdfclean.c"/>
+			<F N="apps/pdfdraw.c"/>
+			<F N="apps/pdfextract.c"/>
+			<F N="apps/pdfinfo.c"/>
+			<F N="apps/pdfshow.c"/>
+			<F N="apps/win_main.c"/>
+			<F N="apps/win_res.rc"/>
+			<F N="apps/x11_image.c"/>
+			<F N="apps/x11_main.c"/>
+			<F N="apps/xpsdraw.c"/>
+		</Folder>
+		<Folder Name="apps/man">
+			<F N="apps/man/mupdf.1"/>
+			<F N="apps/man/pdfclean.1"/>
+			<F N="apps/man/pdfdraw.1"/>
+			<F N="apps/man/pdfshow.1"/>
+		</Folder>
+		<Folder
+			Name="com.artifex.mupdf"
+			Type="Package">
+			<F N="android/src/com/artifex/mupdf/MuPDFActivity.java"/>
+			<F N="android/src/com/artifex/mupdf/MuPDFCore.java"/>
+			<F N="android/src/com/artifex/mupdf/PixmapView.java"/>
+		</Folder>
+		<Folder Name="debian">
+			<F N="debian/libmupdf-dev.install"/>
+			<F N="debian/mupdf-tools.docs"/>
+			<F N="debian/mupdf-tools.install"/>
+			<F N="debian/mupdf-tools.manpages"/>
+			<F N="debian/mupdf.applications"/>
+			<F N="debian/mupdf.desktop"/>
+			<F N="debian/mupdf.docs"/>
+			<F N="debian/mupdf.install"/>
+			<F N="debian/mupdf.manpages"/>
+			<F N="debian/mupdf.menu"/>
+			<F N="debian/mupdf.mime"/>
+			<F N="debian/mupdf.pc"/>
+			<F N="debian/mupdf.png"/>
+			<F N="debian/mupdf.xpm"/>
+		</Folder>
+		<Folder Name="draw">
+			<F N="draw/arch_arm.c"/>
+			<F N="draw/arch_port.c"/>
+			<F N="draw/draw_affine.c"/>
+			<F N="draw/draw_blend.c"/>
+			<F N="draw/draw_device.c"/>
+			<F N="draw/draw_edge.c"/>
+			<F N="draw/draw_glyph.c"/>
+			<F N="draw/draw_mesh.c"/>
+			<F N="draw/draw_paint.c"/>
+			<F N="draw/draw_path.c"/>
+			<F N="draw/draw_scale.c"/>
+			<F N="draw/draw_unpack.c"/>
+		</Folder>
+		<Folder Name="fitz">
+			<F N="fitz/base_error.c"/>
+			<F N="fitz/base_geometry.c"/>
+			<F N="fitz/base_getopt.c"/>
+			<F N="fitz/base_hash.c"/>
+			<F N="fitz/base_memory.c"/>
+			<F N="fitz/base_object.c"/>
+			<F N="fitz/base_string.c"/>
+			<F N="fitz/base_time.c"/>
+			<F N="fitz/crypt_aes.c"/>
+			<F N="fitz/crypt_arc4.c"/>
+			<F N="fitz/crypt_md5.c"/>
+			<F N="fitz/crypt_sha2.c"/>
+			<F N="fitz/dev_bbox.c"/>
+			<F N="fitz/dev_list.c"/>
+			<F N="fitz/dev_null.c"/>
+			<F N="fitz/dev_text.c"/>
+			<F N="fitz/dev_trace.c"/>
+			<F N="fitz/filt_basic.c"/>
+			<F N="fitz/filt_dctd.c"/>
+			<F N="fitz/filt_faxd.c"/>
+			<F N="fitz/filt_flate.c"/>
+			<F N="fitz/filt_jbig2d.c"/>
+			<F N="fitz/filt_jpxd.c"/>
+			<F N="fitz/filt_lzwd.c"/>
+			<F N="fitz/filt_predict.c"/>
+			<F N="fitz/obj_print.c"/>
+			<F N="fitz/res_bitmap.c"/>
+			<F N="fitz/res_colorspace.c"/>
+			<F N="fitz/res_font.c"/>
+			<F N="fitz/res_halftone.c"/>
+			<F N="fitz/res_path.c"/>
+			<F N="fitz/res_pixmap.c"/>
+			<F N="fitz/res_shade.c"/>
+			<F N="fitz/res_text.c"/>
+			<F N="fitz/stm_buffer.c"/>
+			<F N="fitz/stm_open.c"/>
+			<F N="fitz/stm_read.c"/>
+			<F N="fitz/fitz.h"/>
+		</Folder>
+		<Folder Name="fonts">
+			<F N="fonts/Dingbats.cff"/>
+			<F N="fonts/NimbusMonL-Bold.cff"/>
+			<F N="fonts/NimbusMonL-BoldObli.cff"/>
+			<F N="fonts/NimbusMonL-Regu.cff"/>
+			<F N="fonts/NimbusMonL-ReguObli.cff"/>
+			<F N="fonts/NimbusRomNo9L-Medi.cff"/>
+			<F N="fonts/NimbusRomNo9L-MediItal.cff"/>
+			<F N="fonts/NimbusRomNo9L-Regu.cff"/>
+			<F N="fonts/NimbusRomNo9L-ReguItal.cff"/>
+			<F N="fonts/NimbusSanL-Bold.cff"/>
+			<F N="fonts/NimbusSanL-BoldItal.cff"/>
+			<F N="fonts/NimbusSanL-Regu.cff"/>
+			<F N="fonts/NimbusSanL-ReguItal.cff"/>
+			<F N="fonts/StandardSymL.cff"/>
+		</Folder>
+		<Folder Name="fonts/droid">
+			<F N="fonts/droid/DroidSans.ttf"/>
+			<F N="fonts/droid/DroidSansFallback.ttf"/>
+			<F N="fonts/droid/DroidSansMono.ttf"/>
+		</Folder>
+		<Folder Name="pdf">
+			<F N="pdf/data_encodings.h"/>
+			<F N="pdf/data_glyphlist.h"/>
+			<F N="pdf/pdf_annot.c"/>
+			<F N="pdf/pdf_cmap.c"/>
+			<F N="pdf/pdf_cmap_load.c"/>
+			<F N="pdf/pdf_cmap_parse.c"/>
+			<F N="pdf/pdf_cmap_table.c"/>
+			<F N="pdf/pdf_colorspace.c"/>
+			<F N="pdf/pdf_crypt.c"/>
+			<F N="pdf/pdf_encoding.c"/>
+			<F N="pdf/pdf_font.c"/>
+			<F N="pdf/pdf_fontfile.c"/>
+			<F N="pdf/pdf_function.c"/>
+			<F N="pdf/pdf_image.c"/>
+			<F N="pdf/pdf_interpret.c"/>
+			<F N="pdf/pdf_lex.c"/>
+			<F N="pdf/pdf_metrics.c"/>
+			<F N="pdf/pdf_nametree.c"/>
+			<F N="pdf/pdf_outline.c"/>
+			<F N="pdf/pdf_page.c"/>
+			<F N="pdf/pdf_parse.c"/>
+			<F N="pdf/pdf_pattern.c"/>
+			<F N="pdf/pdf_repair.c"/>
+			<F N="pdf/pdf_shade.c"/>
+			<F N="pdf/pdf_store.c"/>
+			<F N="pdf/pdf_stream.c"/>
+			<F N="pdf/pdf_type3.c"/>
+			<F N="pdf/pdf_unicode.c"/>
+			<F N="pdf/pdf_xobject.c"/>
+			<F N="pdf/pdf_xref.c"/>
+			<F N="pdf/mupdf.h"/>
+		</Folder>
+		<Folder Name="scripts">
+			<F N="scripts/cmapdump.c"/>
+			<F N="scripts/fontdump.c"/>
+			<F N="scripts/glyphdump.py"/>
+			<F N="scripts/jconfig.h"/>
+			<F N="scripts/opj_config.h"/>
+			<F N="scripts/slimftmodules.h"/>
+			<F N="scripts/slimftoptions.h"/>
+			<F N="scripts/glyphlist.txt"/>
+			<F N="scripts/rename.sed"/>
+		</Folder>
+		<Folder Name="win32">
+			<F N="win32/generate.bat"/>
+			<F N="win32/libmupdf.vcproj"/>
+			<F N="win32/libthirdparty.vcproj"/>
+			<F N="win32/mupdf.sln"/>
+			<F N="win32/mupdf.vcproj"/>
+			<F N="win32/pdfclean.vcproj"/>
+			<F N="win32/pdfdraw.vcproj"/>
+			<F N="win32/pdfextract.vcproj"/>
+			<F N="win32/pdfshow.vcproj"/>
+			<F N="win32/README.txt"/>
+			<F N="win32/xpsdraw.vcproj"/>
+		</Folder>
+		<Folder Name="xps">
+			<F N="xps/xps_common.c"/>
+			<F N="xps/xps_doc.c"/>
+			<F N="xps/xps_glyphs.c"/>
+			<F N="xps/xps_gradient.c"/>
+			<F N="xps/xps_image.c"/>
+			<F N="xps/xps_jpeg.c"/>
+			<F N="xps/xps_path.c"/>
+			<F N="xps/xps_png.c"/>
+			<F N="xps/xps_resource.c"/>
+			<F N="xps/xps_tiff.c"/>
+			<F N="xps/xps_tile.c"/>
+			<F N="xps/xps_util.c"/>
+			<F N="xps/xps_xml.c"/>
+			<F N="xps/xps_zip.c"/>
+			<F N="xps/muxps.h"/>
+		</Folder>
+		<F N="mupdf.vpj"/>
+		<F N="mupdf.vpw"/>
+		<F N="mupdf.vpwhistu"/>
+	</Files>
+</Project>
