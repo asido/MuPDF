@@ -158,9 +158,9 @@ void pdfapp_closemarkfile(pdfapp_t *app)
 	app->hdlmark = NULL;
 }
 
-unsigned char *pdfapp_calcfilehash(pdfapp_t *app, int fd)
+char *pdfapp_calcfilehash(pdfapp_t *app, int fd)
 {
-	static int MAX_HASH_DATA_SZ = 10;
+	static int MAX_HASH_DATA_SZ = 65535;
 
 	gcry_md_hd_t digest;
 	size_t data_sz = MIN(app->xref->file_size, MAX_HASH_DATA_SZ);
@@ -185,6 +185,7 @@ unsigned char *pdfapp_calcfilehash(pdfapp_t *app, int fd)
 	memcpy(app->hash, gcry_md_read(digest, 0), 20);
 
 	gcry_md_close(digest);
+	free(data_buf);
 
 	app->hash[20] = '\0';
 	return app->hash;
@@ -192,7 +193,7 @@ unsigned char *pdfapp_calcfilehash(pdfapp_t *app, int fd)
 
 int pdfapp_getpgmark(pdfapp_t *app)
 {
-	unsigned char buf[4096];
+	char buf[4096];
 	char *split_ptr;
 
     if (!app->hdlmark)
@@ -237,9 +238,10 @@ static char *pdfapp_gensaveline(pdfapp_t *app, char *buf)
 
 int pdfapp_savemark(pdfapp_t *app)
 {
-	char *linebuf;
-	char *filebuf;
+	char *linebuf = NULL;
+	char *filebuf = NULL;
 	int filesz;
+	int result = 0;
 
 	if (!app->hdlmark)
 		return -1;
@@ -251,8 +253,20 @@ int pdfapp_savemark(pdfapp_t *app)
 		fseek(app->hdlmark, 0, SEEK_SET);
 
 		filebuf = (char *) malloc(filesz);
+		if (!filebuf)
+		{
+			fprintf(stderr, "WARNING: no memory, save mark failed");
+			result = -1;
+			goto done;
+		}
 		filebuf[0] = '\0';
 		linebuf = (char *) malloc(4096);
+		if (!linebuf)
+		{
+			fprintf(stderr, "WARNING: no memory, save mark failed");
+			result = -1;
+			goto done;
+		}
 
 		while (fgets(linebuf, 4096, app->hdlmark))
 		{
@@ -266,9 +280,6 @@ int pdfapp_savemark(pdfapp_t *app)
 		fseek(app->hdlmark, 0, SEEK_SET);
 		fwrite(filebuf, sizeof(filebuf[0]), filesz, app->hdlmark);
 		ftruncate(fileno(app->hdlmark), filesz);
-
-		free((void *) filebuf);
-		free((void *) linebuf);
 	}
 	else
 	{
@@ -276,10 +287,15 @@ int pdfapp_savemark(pdfapp_t *app)
 		fseek(app->hdlmark, 0, SEEK_END);
 		pdfapp_gensaveline(app, linebuf);
 		fwrite(linebuf, sizeof(linebuf[0]), strlen(linebuf), app->hdlmark);
-		free((void *) linebuf);
 	}
 
-	return 0;
+done:
+	if (filebuf)
+		free(filebuf);
+	if (linebuf)
+		free(linebuf);
+
+	return result;
 }
 
 void pdfapp_invert(pdfapp_t *app, fz_bbox rect)

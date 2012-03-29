@@ -31,7 +31,7 @@ struct pdfapp_s
 	/* Mark file handler */
 	FILE *hdlmark;
 	int hasmark;
-	unsigned char hash[21];
+	char hash[21];
 
 	/* current document params */
 	char *doctitle;
@@ -102,7 +102,7 @@ FILE *pdfapp_getmarkfile(pdfapp_t *app);
 void pdfapp_closemarkfile(pdfapp_t *app);
 int pdfapp_getpgmark(pdfapp_t *app);
 int pdfapp_savemark(pdfapp_t *app);
-unsigned char *pdfapp_calcfilehash(pdfapp_t *app, int fd);
+char *pdfapp_calcfilehash(pdfapp_t *app, int fd);
 
 char *pdfapp_version(pdfapp_t *app);
 char *pdfapp_usage(pdfapp_t *app);
