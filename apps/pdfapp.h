@@ -28,6 +28,11 @@ extern void winhelp(pdfapp_t*);
 
 struct pdfapp_s
 {
+	/* Mark file handler */
+	FILE *hdlmark;
+	int hasmark;
+	unsigned char hash[21];
+
 	/* current document params */
 	char *doctitle;
 	pdf_xref *xref;
@@ -93,6 +98,12 @@ void pdfapp_init(pdfapp_t *app);
 void pdfapp_open(pdfapp_t *app, char *filename, int fd, int reload);
 void pdfapp_close(pdfapp_t *app);
 
+FILE *pdfapp_getmarkfile(pdfapp_t *app);
+void pdfapp_closemarkfile(pdfapp_t *app);
+int pdfapp_getpgmark(pdfapp_t *app);
+int pdfapp_savemark(pdfapp_t *app);
+unsigned char *pdfapp_calcfilehash(pdfapp_t *app, int fd);
+
 char *pdfapp_version(pdfapp_t *app);
 char *pdfapp_usage(pdfapp_t *app);
 
@@ -103,3 +114,5 @@ void pdfapp_onresize(pdfapp_t *app, int w, int h);
 
 void pdfapp_invert(pdfapp_t *app, fz_bbox rect);
 void pdfapp_inverthit(pdfapp_t *app);
+
+void pdfapp_showpage(pdfapp_t *app, int loadpage, int drawpage, int repaint);

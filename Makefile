@@ -10,7 +10,7 @@ GEN := generated
 default: all
 
 CFLAGS += -Ifitz -Ipdf -Ixps -Iscripts
-LIBS += -lfreetype -ljbig2dec -ljpeg -lopenjpeg -lz -lm
+LIBS += -lfreetype -ljbig2dec -ljpeg -lopenjpeg -lz -lm -lxdg-basedir -lgcrypt
 
 include Makerules
 include Makethird

@@ -529,6 +529,13 @@ static void signal_handler(int signal)
 		reloading = 1;
 }
 
+static void exit_cb()
+{
+	if (gapp.hdlmark)
+		if (pdfapp_savemark(&gapp))
+			printf("Mark save failed");
+}
+
 static void usage(void)
 {
 	fprintf(stderr, "usage: mupdf [options] file.pdf [page]\n");
@@ -549,6 +556,7 @@ int main(int argc, char **argv)
 	int oldy = 0;
 	int resolution = 72;
 	int pageno = 1;
+	int pagemark = 0;
 	int accelerate = 1;
 	int fd;
 	fd_set fds;
@@ -575,13 +583,10 @@ int main(int argc, char **argv)
 	if (argc - fz_optind == 0)
 		usage();
 
-	filename = argv[fz_optind++];
-
-	if (argc - fz_optind == 1)
-		pageno = atoi(argv[fz_optind++]);
-
 	if (accelerate)
 		fz_accelerate();
+
+	filename = argv[fz_optind++];
 
 	winopen();
 
@@ -589,6 +594,10 @@ int main(int argc, char **argv)
 	gapp.scrw = DisplayWidth(xdpy, xscr);
 	gapp.scrh = DisplayHeight(xdpy, xscr);
 	gapp.resolution = resolution;
+
+	if (argc - fz_optind > 1)
+		pageno = atoi(argv[fz_optind++]);
+
 	gapp.pageno = pageno;
 
 	fd = open(filename, O_BINARY | O_RDONLY, 0666);
@@ -597,10 +606,27 @@ int main(int argc, char **argv)
 
 	pdfapp_open(&gapp, filename, fd, 0);
 
+	if (pdfapp_calcfilehash(&gapp, fd))
+	{
+		pdfapp_getmarkfile(&gapp);
+		pagemark = pdfapp_getpgmark(&gapp);
+		if (pagemark > 0)
+		{
+			if (pagemark <= gapp.pagecount)
+			{
+				gapp.pageno = pagemark;
+				pdfapp_showpage(&gapp, 1, 1, 1);
+			}
+			else
+				pdfapp_closemarkfile(&gapp);
+		}
+	}
+
 	FD_ZERO(&fds);
 	FD_SET(x11fd, &fds);
 
 	signal(SIGHUP, signal_handler);
+	atexit(exit_cb);
 
 	while (!closing)
 	{

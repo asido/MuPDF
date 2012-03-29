@@ -5,6 +5,8 @@
 #error "fitz.h must be included before mupdf.h"
 #endif
 
+#define MARK_FILE "mupdf.mark"
+
 typedef struct pdf_xref_s pdf_xref;
 
 /*

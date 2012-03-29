@@ -4,6 +4,10 @@
 #include "pdfapp.h"
 
 #include <ctype.h> /* for tolower() */
+#include <gcrypt.h>
+#include <basedir.h>
+#include <sys/stat.h>
+
 
 #define ZOOMSTEP 1.142857
 #define BEYOND_THRESHHOLD 40
@@ -15,7 +19,7 @@ enum panning
 	PAN_TO_BOTTOM
 };
 
-static void pdfapp_showpage(pdfapp_t *app, int loadpage, int drawpage, int repaint);
+static char *pdfapp_buildfilepath(const char *dir, const char *file, char *buf);
 
 static void pdfapp_warn(pdfapp_t *app, const char *fmt, ...)
 {
@@ -74,6 +78,208 @@ void pdfapp_init(pdfapp_t *app)
 	app->scrw = 640;
 	app->scrh = 480;
 	app->resolution = 72;
+	app->hasmark = 0;
+}
+
+static char *pdfapp_buildfilepath(const char *dir, const char *file, char *buf)
+{
+	size_t len;
+
+	buf[0] = '\0';
+	strcat(buf, dir);
+	len = strlen(buf);
+	if (buf[len - 1] != '/')
+	{
+		buf[len] = '/';
+		buf[len + 1] = '\0';
+	}
+	strcat(buf, file);
+
+	return buf;
+}
+
+FILE *pdfapp_getmarkfile(pdfapp_t *app)
+{
+	xdgHandle xdg;
+	struct stat st;
+	const char * const *conf_dirs;
+	const char * const *dir;
+	char path[PATH_MAX];
+
+	if (!xdgInitHandle(&xdg))
+		return NULL;
+
+	conf_dirs = xdgSearchableConfigDirectories(&xdg);
+	for (dir = conf_dirs; *dir; dir++)
+	{
+		pdfapp_buildfilepath(*dir, MARK_FILE, path);
+		if (stat(path, &st))
+		{
+			if (errno == ENOENT)
+				continue;
+			else
+				perror(NULL);
+		}
+		else
+		{
+			if (S_ISREG(st.st_mode))
+			{
+				app->hdlmark = fopen(path, "r+");
+				break;
+			}
+			else
+				printf("Unknown config file format");
+		}
+	}
+
+	if (!app->hdlmark)
+	{
+		for (dir = conf_dirs; *dir; dir++)
+		{
+			// Use folder in home dir to create config file
+			if (strstr(*dir, "/home") == *dir)
+			{
+				pdfapp_buildfilepath(*dir, MARK_FILE, path);
+				app->hdlmark = fopen(path, "w+");
+				break;
+			}
+		}
+	}
+
+	xdgWipeHandle(&xdg);
+
+	return app->hdlmark;
+}
+
+void pdfapp_closemarkfile(pdfapp_t *app)
+{
+	if (app->hdlmark)
+		fclose(app->hdlmark);
+	app->hdlmark = NULL;
+}
+
+unsigned char *pdfapp_calcfilehash(pdfapp_t *app, int fd)
+{
+	static int MAX_HASH_DATA_SZ = 10;
+
+	gcry_md_hd_t digest;
+	size_t data_sz = MIN(app->xref->file_size, MAX_HASH_DATA_SZ);
+	void *data_buf = malloc(MAX_HASH_DATA_SZ);
+	size_t read_sz;
+
+	if (gcry_md_open(&digest, GCRY_MD_SHA1, 0))
+	{
+		printf("md_open failure");
+		return NULL;
+	}
+
+	read_sz = read(fd, data_buf, data_sz);
+	if (read_sz != MAX_HASH_DATA_SZ)
+	{
+		printf("Calculating file hash failed. Skipping...");
+		gcry_md_close(digest);
+		return NULL;
+	}
+	gcry_md_write(digest, data_buf, read_sz);
+	gcry_md_final(digest);
+	memcpy(app->hash, gcry_md_read(digest, 0), 20);
+
+	gcry_md_close(digest);
+
+	app->hash[20] = '\0';
+	return app->hash;
+}
+
+int pdfapp_getpgmark(pdfapp_t *app)
+{
+	unsigned char buf[4096];
+	char *split_ptr;
+
+    if (!app->hdlmark)
+        return 0;
+    
+	while (fgets(buf, 4096, app->hdlmark))
+	{
+		if (strstr(buf, app->hash) == buf)
+		{
+			split_ptr = strchr(buf, ' ');
+			if (split_ptr)
+			{
+				app->hasmark = 1;
+				return atoi(split_ptr + 1);
+			}
+			else
+				printf("WARNING: corrupted mark file\n");
+		}
+	}
+
+	return 0;
+}
+
+static char *pdfapp_gensaveline(pdfapp_t *app, char *buf)
+{
+	char pagebuf[8];
+
+	if (!buf)
+		return NULL;
+
+	buf[0] = '\0';
+	pagebuf[0] = '\0';
+
+	strcat(buf, app->hash);
+	strcat(buf, " ");
+	sprintf(pagebuf, "%d" ,app->pageno);
+	strcat(buf, pagebuf);
+	strcat(buf, "\n");
+
+	return buf;
+}
+
+int pdfapp_savemark(pdfapp_t *app)
+{
+	char *linebuf;
+	char *filebuf;
+	int filesz;
+
+	if (!app->hdlmark)
+		return -1;
+
+	if (app->hasmark)
+	{
+		fseek(app->hdlmark, 0, SEEK_END);
+		filesz = ftell(app->hdlmark);
+		fseek(app->hdlmark, 0, SEEK_SET);
+
+		filebuf = (char *) malloc(filesz);
+		filebuf[0] = '\0';
+		linebuf = (char *) malloc(4096);
+
+		while (fgets(linebuf, 4096, app->hdlmark))
+		{
+			if (strstr(linebuf, app->hash) == linebuf)
+				pdfapp_gensaveline(app, linebuf);
+
+			strcat(filebuf, linebuf);
+		}
+
+		filesz = strlen(filebuf);
+		fseek(app->hdlmark, 0, SEEK_SET);
+		fwrite(filebuf, sizeof(filebuf[0]), filesz, app->hdlmark);
+		ftruncate(fileno(app->hdlmark), filesz);
+
+		free((void *) filebuf);
+		free((void *) linebuf);
+	}
+	else
+	{
+		linebuf = (char *) malloc(30);
+		fseek(app->hdlmark, 0, SEEK_END);
+		pdfapp_gensaveline(app, linebuf);
+		fwrite(linebuf, sizeof(linebuf[0]), strlen(linebuf), app->hdlmark);
+		free((void *) linebuf);
+	}
+
+	return 0;
 }
 
 void pdfapp_invert(pdfapp_t *app, fz_bbox rect)
@@ -337,7 +543,7 @@ static void pdfapp_loadpage_xps(pdfapp_t *app)
 	xps_free_page(app->xps, page);
 }
 
-static void pdfapp_showpage(pdfapp_t *app, int loadpage, int drawpage, int repaint)
+void pdfapp_showpage(pdfapp_t *app, int loadpage, int drawpage, int repaint)
 {
 	char buf[256];
 	fz_device *idev;
