@@ -166,6 +166,7 @@ char *pdfapp_calcfilehash(pdfapp_t *app, int fd)
 	size_t data_sz = MIN(app->xref->file_size, HASH_DATA_SZ);
 	void *data_buf = malloc(HASH_DATA_SZ);
 	size_t read_sz = 0;
+	size_t retrycnt = 0;
 	size_t i;
 
 	if (gcry_md_open(&digest, GCRY_MD_SHA1, 0))
@@ -178,10 +179,10 @@ char *pdfapp_calcfilehash(pdfapp_t *app, int fd)
 	do
 	{
 		read_sz += read(fd, data_buf + read_sz, data_sz - read_sz);
-	} while (read_sz < data_sz);
+	} while (read_sz < data_sz && retrycnt++ < 5);
 	if (read_sz != data_sz)
 	{
-		printf("Calculating file hash failed. Skipping... %ld\n", read_sz);
+		printf("Calculating file hash failed. Skipping...\n");
 		gcry_md_close(digest);
 		return NULL;
 	}
