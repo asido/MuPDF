@@ -160,12 +160,13 @@ void pdfapp_closemarkfile(pdfapp_t *app)
 
 char *pdfapp_calcfilehash(pdfapp_t *app, int fd)
 {
-	static int MAX_HASH_DATA_SZ = 65535;
+	static int HASH_DATA_SZ = 65535;
 
 	gcry_md_hd_t digest;
-	size_t data_sz = MIN(app->xref->file_size, MAX_HASH_DATA_SZ);
-	void *data_buf = malloc(MAX_HASH_DATA_SZ);
-	size_t read_sz;
+	size_t data_sz = MIN(app->xref->file_size, HASH_DATA_SZ);
+	void *data_buf = malloc(HASH_DATA_SZ);
+	size_t read_sz = 0;
+	size_t i;
 
 	if (gcry_md_open(&digest, GCRY_MD_SHA1, 0))
 	{
@@ -173,10 +174,14 @@ char *pdfapp_calcfilehash(pdfapp_t *app, int fd)
 		return NULL;
 	}
 
-	read_sz = read(fd, data_buf, data_sz);
-	if (read_sz != MAX_HASH_DATA_SZ)
+	lseek(fd, 0, SEEK_SET);
+	do
 	{
-		printf("Calculating file hash failed. Skipping...");
+		read_sz += read(fd, data_buf + read_sz, data_sz - read_sz);
+	} while (read_sz < data_sz);
+	if (read_sz != data_sz)
+	{
+		printf("Calculating file hash failed. Skipping... %ld\n", read_sz);
 		gcry_md_close(digest);
 		return NULL;
 	}
@@ -187,7 +192,11 @@ char *pdfapp_calcfilehash(pdfapp_t *app, int fd)
 	gcry_md_close(digest);
 	free(data_buf);
 
+	for (i = 0; i < 20; i++)
+		if (app->hash[i] == '\n' || app->hash[i] == '\r' || app->hash[i] == ' ')
+			app->hash[i] = '_';
 	app->hash[20] = '\0';
+
 	return app->hash;
 }
 
@@ -252,7 +261,7 @@ int pdfapp_savemark(pdfapp_t *app)
 		filesz = ftell(app->hdlmark);
 		fseek(app->hdlmark, 0, SEEK_SET);
 
-		filebuf = (char *) malloc(filesz);
+		filebuf = (char *) malloc(filesz+6); // 6 extra bytes for expanding
 		if (!filebuf)
 		{
 			fprintf(stderr, "WARNING: no memory, save mark failed");
